@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Simple Free Cloud Drive</title>
+    <style>
+        body { font-family: system-ui, sans-serif; background-color: #f5f7fb; margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        h2 { color: #4285f4; margin-top: 0; display: flex; align-items: center; gap: 10px; }
+        .upload-box { border: 3px dashed #4285f4; background: #f8faff; padding: 40px; text-align: center; border-radius: 10px; cursor: pointer; margin-bottom: 25px; transition: 0.2s; }
+        .upload-box:hover { background: #eef4ff; }
+        .file-list { border-top: 2px solid #eee; padding-top: 20px; }
+        .file-item { display: flex; justify-content: space-between; align-items: center; background: #fafafa; padding: 12px 15px; border-radius: 6px; margin-bottom: 10px; border: 1px solid #eee; }
+        .file-info { display: flex; align-items: center; gap: 10px; font-weight: 500; }
+        .btn-delete { background: #ea4335; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
+        .btn-delete:hover { background: #d33225; }
+        .empty-text { color: #888; text-align: center; font-style: italic; padding: 20px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>📁 My Personal Free Cloud Drive</h2>
+        <p>यह आपका अपना पर्सनल ड्राइव है। यहाँ आप अपनी फाइलें सुरक्षित रूप से जोड़ सकते हैं।</p>
+        
+        <!-- Upload Zone -->
+        <div class="upload-box" id="dropZone">
+            <strong>यहाँ क्लिक करें या अपनी फाइल को खींचकर (Drag & Drop) यहाँ छोड़ें</strong>
+            <p style="color: #666; font-size: 14px; margin-top: 5px;">कंप्यूटर से फाइल चुनने के लिए कहीं भी क्लिक करें</p>
+            <input type="file" id="fileInput" style="display:none" multiple>
+        </div>
+
+        <!-- Files Display -->
+        <div class="file-list">
+            <h3>आपकी अपलोडेड फाइलें:</h3>
+            <div id="filesContainer">
+                <div class="empty-text">अभी कोई फाइल अपलोड नहीं की गई है। ऊपर बॉक्स में फाइल जोड़ें!</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const dropZone = document.getElementById('dropZone');
+        const filesContainer = document.getElementById('filesContainer');
+
+        // जब बॉक्स पर क्लिक हो तो कंप्यूटर की फाइलें खोलें
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        // फाइल सिलेक्ट होने पर उसे लिस्ट में दिखाना
+        fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
+
+        // Drag and drop सपोर्ट
+        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.style.borderColor = '#34a853'; });
+        dropZone.addEventListener('dragleave', () => dropZone.style.borderColor = '#4285f4');
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = '#4285f4';
+            handleFiles(e.dataTransfer.files);
+        });
+
+        // फाइलों को स्क्रीन पर जोड़ने का फंक्शन
+        function handleFiles(files) {
+            if (files.length === 0) return;
+
+            // पहली बार फाइल आने पर "empty text" को हटा दें
+            const emptyText = document.querySelector('.empty-text');
+            if (emptyText) emptyText.remove();
+
+            for (let file of files) {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                
+                // साइज को KB में बदलें
+                const fileSizeKB = (file.size / 1024).toFixed(1);
+
+                fileItem.innerHTML = `
+                    <div class="file-info">
+                        <span>📄</span>
+                        <div>
+                            <div>${file.name}</div>
+                            <span style="font-size:12px; color:#888;">(${fileSizeKB} KB)</span>
+                        </div>
+                    </div>
+                    <button class="btn-delete" onclick="this.parentElement.remove(); checkEmpty();">हटाएं 🗑️</button>
+                `;
+                filesContainer.appendChild(fileItem);
+            }
+        }
+
+        // अगर सारी फाइलें डिलीट हो जाएं तो वापस टेक्स्ट दिखाएं
+        function checkEmpty() {
+            if (filesContainer.children.length === 0) {
+                filesContainer.innerHTML = `<div class="empty-text">अभी कोई फाइल अपलोड नहीं की गई है। ऊपर बॉक्स में फाइल जोड़ें!</div>`;
+            }
+        }
+    </script>
+</body>
+</html>
