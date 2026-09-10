@@ -3,98 +3,176 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Simple Free Cloud Drive</title>
+    <title>Personal Cloud Drive Dashboard</title>
     <style>
-        body { font-family: system-ui, sans-serif; background-color: #f5f7fb; margin: 0; padding: 20px; color: #333; }
-        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        h2 { color: #4285f4; margin-top: 0; display: flex; align-items: center; gap: 10px; }
-        .upload-box { border: 3px dashed #4285f4; background: #f8faff; padding: 40px; text-align: center; border-radius: 10px; cursor: pointer; margin-bottom: 25px; transition: 0.2s; }
-        .upload-box:hover { background: #eef4ff; }
-        .file-list { border-top: 2px solid #eee; padding-top: 20px; }
-        .file-item { display: flex; justify-content: space-between; align-items: center; background: #fafafa; padding: 12px 15px; border-radius: 6px; margin-bottom: 10px; border: 1px solid #eee; }
-        .file-info { display: flex; align-items: center; gap: 10px; font-weight: 500; }
-        .btn-delete { background: #ea4335; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
-        .btn-delete:hover { background: #d33225; }
-        .empty-text { color: #888; text-align: center; font-style: italic; padding: 20px; }
+        :root {
+            --bg-color: #f5f7fb;
+            --card-bg: #ffffff;
+            --text-main: #333333;
+            --text-sub: #666666;
+            --primary: #4285f4;
+            --danger: #ea4335;
+            --success: #34a853;
+            --border: #e0e0e0;
+        }
+        [data-theme="dark"] {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-main: #f5f5f5;
+            --text-sub: #aaaaaa;
+            --primary: #8ab4f8;
+            --danger: #f28b82;
+            --success: #81c995;
+            --border: #333333;
+        }
+        body { font-family: system-ui, -apple-system, sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 0; transition: background 0.3s; }
+        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 15px 30px; background: var(--card-bg); border-bottom: 1px solid var(--border); }
+        .nav-brand { font-size: 20px; font-weight: bold; display: flex; align-items: center; gap: 10px; }
+        .btn { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: 500; font-size: 14px; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-main); }
+        .btn-danger { background: var(--danger); color: white; }
+        .auth-container { max-width: 400px; margin: 80px auto; padding: 30px; background: var(--card-bg); border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 1px solid var(--border); }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-size: 14px; }
+        .form-control { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-color); color: var(--text-main); box-sizing: border-box; }
+        .dashboard { display: grid; grid-template-columns: 240px 1fr; min-height: calc(100vh - 70px); }
+        .sidebar { background: var(--card-bg); padding: 20px; border-right: 1px solid var(--border); }
+        .sidebar-menu { list-style: none; padding: 0; margin: 0; }
+        .sidebar-item { padding: 12px 15px; border-radius: 8px; cursor: pointer; margin-bottom: 5px; display: flex; align-items: center; gap: 10px; }
+        .sidebar-item.active, .sidebar-item:hover { background: var(--bg-color); font-weight: bold; }
+        .main-content { padding: 30px; overflow-y: auto; }
+        .storage-card { background: var(--card-bg); border: 1px solid var(--border); padding: 15px; border-radius: 10px; margin-top: 20px; text-align: center; }
+        .progress-bar { background: var(--bg-color); border-radius: 10px; height: 10px; overflow: hidden; margin: 10px 0; }
+        .progress-fill { background: var(--primary); height: 100%; width: 0%; transition: width 0.3s; }
+        .upload-zone { border: 2px dashed var(--primary); background: var(--card-bg); padding: 40px; text-align: center; border-radius: 12px; cursor: pointer; margin-bottom: 30px; }
+        .file-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
+        .file-card { background: var(--card-bg); border: 1px solid var(--border); padding: 15px; border-radius: 10px; display: flex; flex-direction: column; position: relative; }
+        .file-icon { font-size: 40px; margin-bottom: 10px; text-align: center; }
+        .file-name { font-weight: 500; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; font-size: 14px; }
+        .file-actions { display: flex; justify-content: space-between; margin-top: 15px; }
+        .admin-table { width: 100%; border-collapse: collapse; background: var(--card-bg); border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+        .admin-table th, .admin-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid var(--border); }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h2>📁 My Personal Free Cloud Drive</h2>
-        <p>यह आपका अपना पर्सनल ड्राइव है। यहाँ आप अपनी फाइलें सुरक्षित रूप से जोड़ सकते हैं।</p>
-        
-        <!-- Upload Zone -->
-        <div class="upload-box" id="dropZone">
-            <strong>यहाँ क्लिक करें या अपनी फाइल को खींचकर (Drag & Drop) यहाँ छोड़ें</strong>
-            <p style="color: #666; font-size: 14px; margin-top: 5px;">कंप्यूटर से फाइल चुनने के लिए कहीं भी क्लिक करें</p>
-            <input type="file" id="fileInput" style="display:none" multiple>
+    <nav class="navbar">
+        <div class="nav-brand">📁 My Personal Cloud Drive</div>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <button class="btn btn-outline" id="themeToggle">Toggle Theme 🌙</button>
+            <span id="userGreeting" class="hidden" style="font-weight: 500; margin-right: 10px;"></span>
+            <button class="btn btn-danger hidden" id="logoutBtn">Sign Out</button>
         </div>
+    </nav>
 
-        <!-- Files Display -->
-        <div class="file-list">
-            <h3>आपकी अपलोडेड फाइलें:</h3>
-            <div id="filesContainer">
-                <div class="empty-text">अभी कोई फाइल अपलोड नहीं की गई है। ऊपर बॉक्स में फाइल जोड़ें!</div>
+    <!-- Auth View -->
+    <div id="authView" class="auth-container">
+        <h2 id="authTitle" style="margin-top:0;">Log In</h2>
+        <form id="authForm">
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" id="username" class="form-control" required autocomplete="username">
             </div>
-        </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="password" class="form-control" required autocomplete="current-password">
+            </div>
+            <div id="regFields" class="hidden">
+                <div class="form-group">
+                    <label>Security Question</label>
+                    <select id="secQuestion" class="form-control">
+                        <option>What was the name of your first pet?</option>
+                        <option>What city were you born in?</option>
+                        <option>What is your mother's maiden name?</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Answer</label>
+                    <input type="text" id="secAnswer" class="form-control">
+                </div>
+            </div>
+            <div id="forgotFields" class="hidden">
+                <p id="displayedQuestion" style="font-size:14px; font-weight:500;"></p>
+                <div class="form-group">
+                    <label>Your Security Answer</label>
+                    <input type="text" id="recoveryAnswer" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>New Password</label>
+                    <input type="password" id="newPassword" class="form-control" autocomplete="new-password">
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary" id="authSubmitBtn" style="width:100%; margin-top:10px;">Login</button>
+        </form>
+        <p style="text-align:center; font-size:14px; margin-top:20px; color:var(--text-sub);">
+            <span id="authSwitchText">Don't have an account?</span> 
+            <a href="#" id="authSwitchLink" style="color:var(--primary); text-decoration:none; font-weight:bold;">Sign Up</a>
+        </p>
+        <p style="text-align:center; font-size:14px; margin-top:5px;" id="forgotWrapper">
+            <a href="#" id="forgotLink" style="color:var(--text-sub); text-decoration:none;">Forgot Password?</a>
+        </p>
+    </div>
+
+    <!-- Main App Dashboard View -->
+    <div id="appView" class="dashboard hidden">
+        <aside class="sidebar">
+            <ul class="sidebar-menu">
+                <li class="sidebar-item active" data-tab="files">📂 All Files</li>
+                <li class="sidebar-item" data-tab="trash">🗑️ Trash Bin</li>
+                <li class="sidebar-item hidden" id="adminTab" data-tab="admin">👑 Admin Panel</li>
+            </ul>
+            <div class="storage-card">
+                <div style="font-size: 14px; font-weight: 500;">Storage Profile</div>
+                <div class="progress-bar"><div class="progress-fill" id="storageFill"></div></div>
+                <div style="font-size: 12px; color: var(--text-sub);" id="storageText">0 KB / 50 MB used</div>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <!-- Files Tab -->
+            <div id="tab-files" class="tab-content">
+                <div class="upload-zone" id="dropZone">
+                    <h3>Drag & Drop Files Here</h3>
+                    <p style="color: var(--text-sub);">or click here to select files from your computer</p>
+                    <input type="file" id="manualUpload" style="display:none" multiple>
+                </div>
+                <h2>Your Custom Drive Workspace</h2>
+                <div class="file-grid" id="fileGrid"></div>
+            </div>
+
+            <!-- Trash Tab -->
+            <div id="tab-trash" class="tab-content hidden">
+                <h2>Trash Bin</h2>
+                <p style="color:var(--text-sub); margin-bottom:20px;">Items in your trash can be restored or permanently removed.</p>
+                <div class="file-grid" id="trashGrid"></div>
+            </div>
+
+            <!-- Admin Tab -->
+            <div id="tab-admin" class="tab-content hidden">
+                <h2>Admin Console Platform</h2>
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Registered Username</th>
+                            <th>Role Status</th>
+                            <th>Active Storage Footprint</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminUserList"></tbody>
+                </table>
+            </div>
+        </main>
     </div>
 
     <script>
-        const fileInput = document.getElementById('fileInput');
-        const dropZone = document.getElementById('dropZone');
-        const filesContainer = document.getElementById('filesContainer');
+        // System State
+        let mode = 'login'; 
+        let currentUser = null;
+        const defaultStorageLimit = 50 * 1024 * 1024; // 50MB simulation
 
-        // जब बॉक्स पर क्लिक हो तो कंप्यूटर की फाइलें खोलें
-        dropZone.addEventListener('click', () => fileInput.click());
-
-        // फाइल सिलेक्ट होने पर उसे लिस्ट में दिखाना
-        fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
-
-        // Drag and drop सपोर्ट
-        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.style.borderColor = '#34a853'; });
-        dropZone.addEventListener('dragleave', () => dropZone.style.borderColor = '#4285f4');
-        dropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropZone.style.borderColor = '#4285f4';
-            handleFiles(e.dataTransfer.files);
-        });
-
-        // फाइलों को स्क्रीन पर जोड़ने का फंक्शन
-        function handleFiles(files) {
-            if (files.length === 0) return;
-
-            // पहली बार फाइल आने पर "empty text" को हटा दें
-            const emptyText = document.querySelector('.empty-text');
-            if (emptyText) emptyText.remove();
-
-            for (let file of files) {
-                const fileItem = document.createElement('div');
-                fileItem.className = 'file-item';
-                
-                // साइज को KB में बदलें
-                const fileSizeKB = (file.size / 1024).toFixed(1);
-
-                fileItem.innerHTML = `
-                    <div class="file-info">
-                        <span>📄</span>
-                        <div>
-                            <div>${file.name}</div>
-                            <span style="font-size:12px; color:#888;">(${fileSizeKB} KB)</span>
-                        </div>
-                    </div>
-                    <button class="btn-delete" onclick="this.parentElement.remove(); checkEmpty();">हटाएं 🗑️</button>
-                `;
-                filesContainer.appendChild(fileItem);
-            }
-        }
-
-        // अगर सारी फाइलें डिलीट हो जाएं तो वापस टेक्स्ट दिखाएं
-        function checkEmpty() {
-            if (filesContainer.children.length === 0) {
-                filesContainer.innerHTML = `<div class="empty-text">अभी कोई फाइल अपलोड नहीं की गई है। ऊपर बॉक्स में फाइल जोड़ें!</div>`;
-            }
-        }
-    </script>
-</body>
-</html>
+        // Safe Initialization of Data
+        if(!localStorage.getItem('drive_users')) {
+            localStorage.setItem('drive_users', JSON.stringify({
+                'admin': {password: 'admin123', question: 'What city were you born in?', answer: 'AdminCity', role: 'admin'},
