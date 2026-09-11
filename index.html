@@ -1,178 +1,648 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Personal Cloud Drive Dashboard</title>
-    <style>
-        :root {
-            --bg-color: #f5f7fb;
-            --card-bg: #ffffff;
-            --text-main: #333333;
-            --text-sub: #666666;
-            --primary: #4285f4;
-            --danger: #ea4335;
-            --success: #34a853;
-            --border: #e0e0e0;
-        }
-        [data-theme="dark"] {
-            --bg-color: #121212;
-            --card-bg: #1e1e1e;
-            --text-main: #f5f5f5;
-            --text-sub: #aaaaaa;
-            --primary: #8ab4f8;
-            --danger: #f28b82;
-            --success: #81c995;
-            --border: #333333;
-        }
-        body { font-family: system-ui, -apple-system, sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 0; transition: background 0.3s; }
-        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 15px 30px; background: var(--card-bg); border-bottom: 1px solid var(--border); }
-        .nav-brand { font-size: 20px; font-weight: bold; display: flex; align-items: center; gap: 10px; }
-        .btn { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: 500; font-size: 14px; }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-main); }
-        .btn-danger { background: var(--danger); color: white; }
-        .auth-container { max-width: 400px; margin: 80px auto; padding: 30px; background: var(--card-bg); border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 1px solid var(--border); }
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 5px; font-size: 14px; }
-        .form-control { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-color); color: var(--text-main); box-sizing: border-box; }
-        .dashboard { display: grid; grid-template-columns: 240px 1fr; min-height: calc(100vh - 70px); }
-        .sidebar { background: var(--card-bg); padding: 20px; border-right: 1px solid var(--border); }
-        .sidebar-menu { list-style: none; padding: 0; margin: 0; }
-        .sidebar-item { padding: 12px 15px; border-radius: 8px; cursor: pointer; margin-bottom: 5px; display: flex; align-items: center; gap: 10px; }
-        .sidebar-item.active, .sidebar-item:hover { background: var(--bg-color); font-weight: bold; }
-        .main-content { padding: 30px; overflow-y: auto; }
-        .storage-card { background: var(--card-bg); border: 1px solid var(--border); padding: 15px; border-radius: 10px; margin-top: 20px; text-align: center; }
-        .progress-bar { background: var(--bg-color); border-radius: 10px; height: 10px; overflow: hidden; margin: 10px 0; }
-        .progress-fill { background: var(--primary); height: 100%; width: 0%; transition: width 0.3s; }
-        .upload-zone { border: 2px dashed var(--primary); background: var(--card-bg); padding: 40px; text-align: center; border-radius: 12px; cursor: pointer; margin-bottom: 30px; }
-        .file-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
-        .file-card { background: var(--card-bg); border: 1px solid var(--border); padding: 15px; border-radius: 10px; display: flex; flex-direction: column; position: relative; }
-        .file-icon { font-size: 40px; margin-bottom: 10px; text-align: center; }
-        .file-name { font-weight: 500; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; font-size: 14px; }
-        .file-actions { display: flex; justify-content: space-between; margin-top: 15px; }
-        .admin-table { width: 100%; border-collapse: collapse; background: var(--card-bg); border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
-        .admin-table th, .admin-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid var(--border); }
-        .hidden { display: none !important; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Drive</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #202124;
+    background: #fff;
+}
+
+.app {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* SIDEBAR */
+.sidebar {
+    width: 250px;
+    border-right: 1px solid #e5e7eb;
+    padding: 18px 12px;
+    background: #fff;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 22px;
+    margin: 4px 10px 24px;
+}
+
+.logoMark {
+    font-size: 25px;
+}
+
+.new {
+    border: 1px solid #dadce0;
+    background: #fff;
+    border-radius: 18px;
+    padding: 13px 22px;
+    font-size: 15px;
+    box-shadow: 0 1px 2px #ddd;
+    cursor: pointer;
+    margin-bottom: 18px;
+}
+
+.new:hover {
+    background: #f8fafd;
+}
+
+.nav div {
+    padding: 10px 15px;
+    border-radius: 20px;
+    margin: 3px 0;
+    cursor: pointer;
+}
+
+.nav div:hover,
+.nav .active {
+    background: #e8f0fe;
+}
+
+.storage {
+    margin: 25px 15px;
+}
+
+.bar {
+    height: 6px;
+    background: #e8eaed;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.bar span {
+    display: block;
+    width: 35%;
+    height: 100%;
+    background: #1a73e8;
+}
+
+.storage small {
+    display: block;
+    margin-top: 10px;
+    color: #5f6368;
+}
+
+/* MAIN */
+.main {
+    flex: 1;
+    min-width: 0;
+}
+
+.top {
+    height: 76px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 0 25px;
+}
+
+.search {
+    flex: 1;
+    max-width: 720px;
+    background: #f1f3f4;
+    border-radius: 28px;
+    padding: 14px 20px;
+    display: flex;
+    gap: 12px;
+}
+
+.search input {
+    border: 0;
+    background: transparent;
+    outline: 0;
+    width: 100%;
+    font-size: 16px;
+}
+
+.actions {
+    display: flex;
+    gap: 10px;
+}
+
+.icon {
+    border: 0;
+    background: transparent;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+/* CONTENT */
+.content {
+    padding: 28px;
+    overflow: auto;
+    height: calc(100vh - 76px);
+}
+
+.heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.heading h2 {
+    font-size: 22px;
+    font-weight: 400;
+}
+
+.view button {
+    border: 0;
+    background: transparent;
+    font-size: 19px;
+    cursor: pointer;
+}
+
+/* FOLDER CARDS */
+.cards {
+    display: grid;
+    grid-template-columns: repeat(
+        auto-fill,
+        minmax(210px, 1fr)
+    );
+    gap: 15px;
+    margin-top: 18px;
+}
+
+.card {
+    border: 1px solid #dadce0;
+    border-radius: 10px;
+    padding: 17px;
+    cursor: pointer;
+    transition: .15s;
+}
+
+.card:hover {
+    background: #f8f9fa;
+    box-shadow: 0 1px 3px #ddd;
+}
+
+.folderIcon {
+    font-size: 28px;
+}
+
+.cardTitle {
+    margin-top: 15px;
+    font-size: 15px;
+}
+
+.meta {
+    color: #70757a;
+    font-size: 12px;
+    margin-top: 7px;
+}
+
+/* FILE TABLE */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 25px;
+}
+
+.table th {
+    text-align: left;
+    color: #5f6368;
+    font-weight: 500;
+    font-size: 13px;
+    border-bottom: 1px solid #dadce0;
+    padding: 12px;
+}
+
+.table td {
+    padding: 14px 12px;
+    border-bottom: 1px solid #eee;
+    font-size: 14px;
+}
+
+.fileName {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.fileIcon {
+    font-size: 22px;
+}
+
+.empty {
+    padding: 60px;
+    text-align: center;
+    color: #777;
+    display: none;
+}
+
+/* MOBILE */
+@media(max-width:700px) {
+
+    .sidebar {
+        width: 70px;
+    }
+
+    .sidebar .label,
+    .storage,
+    .logo span {
+        display: none;
+    }
+
+    .logo {
+        justify-content: center;
+    }
+
+    .new {
+        font-size: 0;
+        padding: 14px;
+        border-radius: 50%;
+    }
+
+    .new:after {
+        content: '+';
+        font-size: 22px;
+    }
+
+    .nav div {
+        text-align: center;
+        padding: 12px;
+    }
+
+    .content {
+        padding: 18px;
+    }
+
+    .top {
+        padding: 0 12px;
+    }
+
+    .actions {
+        display: none;
+    }
+}
+</style>
 </head>
+
 <body>
 
-    <nav class="navbar">
-        <div class="nav-brand">📁 My Personal Cloud Drive</div>
-        <div style="display: flex; gap: 10px; align-items: center;">
-            <button class="btn btn-outline" id="themeToggle">Toggle Theme 🌙</button>
-            <span id="userGreeting" class="hidden" style="font-weight: 500; margin-right: 10px;"></span>
-            <button class="btn btn-danger hidden" id="logoutBtn">Sign Out</button>
+<div class="app">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+
+    <div class="logo">
+        <span class="logoMark">▰</span>
+        <span>My Drive</span>
+    </div>
+
+    <button class="new" onclick="uploadFile()">
+        ＋ New
+    </button>
+
+    <input
+        id="fileInput"
+        type="file"
+        multiple
+        hidden
+        onchange="handleFiles(this.files)"
+    >
+
+    <nav class="nav">
+
+        <div class="active">
+            📁
+            <span class="label">My Drive</span>
         </div>
+
+        <div>
+            💻
+            <span class="label">Computers</span>
+        </div>
+
+        <div>
+            👥
+            <span class="label">Shared with me</span>
+        </div>
+
+        <div>
+            🕘
+            <span class="label">Recent</span>
+        </div>
+
+        <div>
+            ⭐
+            <span class="label">Starred</span>
+        </div>
+
+        <div>
+            🗑️
+            <span class="label">Trash</span>
+        </div>
+
     </nav>
 
-    <!-- Auth View -->
-    <div id="authView" class="auth-container">
-        <h2 id="authTitle" style="margin-top:0;">Log In</h2>
-        <form id="authForm">
-            <div class="form-group">
-                <label>Username</label>
-                <input type="text" id="username" class="form-control" required autocomplete="username">
-            </div>
-            <div class="form-group">
-                <label>Password</label>
-                <input type="password" id="password" class="form-control" required autocomplete="current-password">
-            </div>
-            <div id="regFields" class="hidden">
-                <div class="form-group">
-                    <label>Security Question</label>
-                    <select id="secQuestion" class="form-control">
-                        <option>What was the name of your first pet?</option>
-                        <option>What city were you born in?</option>
-                        <option>What is your mother's maiden name?</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Answer</label>
-                    <input type="text" id="secAnswer" class="form-control">
-                </div>
-            </div>
-            <div id="forgotFields" class="hidden">
-                <p id="displayedQuestion" style="font-size:14px; font-weight:500;"></p>
-                <div class="form-group">
-                    <label>Your Security Answer</label>
-                    <input type="text" id="recoveryAnswer" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label>New Password</label>
-                    <input type="password" id="newPassword" class="form-control" autocomplete="new-password">
-                </div>
-            </div>
-            <button type="submit" class="btn btn-primary" id="authSubmitBtn" style="width:100%; margin-top:10px;">Login</button>
-        </form>
-        <p style="text-align:center; font-size:14px; margin-top:20px; color:var(--text-sub);">
-            <span id="authSwitchText">Don't have an account?</span> 
-            <a href="#" id="authSwitchLink" style="color:var(--primary); text-decoration:none; font-weight:bold;">Sign Up</a>
-        </p>
-        <p style="text-align:center; font-size:14px; margin-top:5px;" id="forgotWrapper">
-            <a href="#" id="forgotLink" style="color:var(--text-sub); text-decoration:none;">Forgot Password?</a>
-        </p>
+    <div class="storage">
+
+        <div class="bar">
+            <span></span>
+        </div>
+
+        <small>
+            3.5 GB of 10 GB used
+        </small>
+
     </div>
 
-    <!-- Main App Dashboard View -->
-    <div id="appView" class="dashboard hidden">
-        <aside class="sidebar">
-            <ul class="sidebar-menu">
-                <li class="sidebar-item active" data-tab="files">📂 All Files</li>
-                <li class="sidebar-item" data-tab="trash">🗑️ Trash Bin</li>
-                <li class="sidebar-item hidden" id="adminTab" data-tab="admin">👑 Admin Panel</li>
-            </ul>
-            <div class="storage-card">
-                <div style="font-size: 14px; font-weight: 500;">Storage Profile</div>
-                <div class="progress-bar"><div class="progress-fill" id="storageFill"></div></div>
-                <div style="font-size: 12px; color: var(--text-sub);" id="storageText">0 KB / 50 MB used</div>
-            </div>
-        </aside>
+</aside>
 
-        <main class="main-content">
-            <!-- Files Tab -->
-            <div id="tab-files" class="tab-content">
-                <div class="upload-zone" id="dropZone">
-                    <h3>Drag & Drop Files Here</h3>
-                    <p style="color: var(--text-sub);">or click here to select files from your computer</p>
-                    <input type="file" id="manualUpload" style="display:none" multiple>
-                </div>
-                <h2>Your Custom Drive Workspace</h2>
-                <div class="file-grid" id="fileGrid"></div>
-            </div>
 
-            <!-- Trash Tab -->
-            <div id="tab-trash" class="tab-content hidden">
-                <h2>Trash Bin</h2>
-                <p style="color:var(--text-sub); margin-bottom:20px;">Items in your trash can be restored or permanently removed.</p>
-                <div class="file-grid" id="trashGrid"></div>
-            </div>
+<!-- MAIN -->
+<main class="main">
 
-            <!-- Admin Tab -->
-            <div id="tab-admin" class="tab-content hidden">
-                <h2>Admin Console Platform</h2>
-                <table class="admin-table">
-                    <thead>
-                        <tr>
-                            <th>Registered Username</th>
-                            <th>Role Status</th>
-                            <th>Active Storage Footprint</th>
-                        </tr>
-                    </thead>
-                    <tbody id="adminUserList"></tbody>
-                </table>
-            </div>
-        </main>
+<header class="top">
+
+    <div class="search">
+
+        🔎
+
+        <input
+            id="search"
+            placeholder="Search in Drive"
+            oninput="render()"
+        >
+
     </div>
 
-    <script>
-        // System State
-        let mode = 'login'; 
-        let currentUser = null;
-        const defaultStorageLimit = 50 * 1024 * 1024; // 50MB simulation
+    <div class="actions">
 
-        // Safe Initialization of Data
-        if(!localStorage.getItem('drive_users')) {
-            localStorage.setItem('drive_users', JSON.stringify({
-                'admin': {password: 'admin123', question: 'What city were you born in?', answer: 'AdminCity', role: 'admin'},
+        <button class="icon">
+            ❔
+        </button>
+
+        <button class="icon">
+            ⚙️
+        </button>
+
+        <button class="icon">
+            ●
+        </button>
+
+    </div>
+
+</header>
+
+
+<section class="content">
+
+    <div class="heading">
+
+        <h2>
+            My Drive
+        </h2>
+
+        <div class="view">
+
+            <button onclick="toggleView()">
+                ☷
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- FOLDERS -->
+    <div id="folders" class="cards"></div>
+
+
+    <!-- FILES -->
+    <table id="filesTable" class="table">
+
+        <thead>
+
+            <tr>
+
+                <th>Name</th>
+
+                <th>Owner</th>
+
+                <th>Last modified</th>
+
+                <th>File size</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody></tbody>
+
+    </table>
+
+
+    <div id="empty" class="empty">
+        No files found
+    </div>
+
+</section>
+
+</main>
+
+</div>
+
+
+<script>
+
+/* DEFAULT FILES */
+
+let files = [
+
+    {
+        name: 'Project Documents',
+        type: 'folder',
+        owner: 'Me',
+        modified: 'Sep 10, 2026',
+        size: '—'
+    },
+
+    {
+        name: 'Photos',
+        type: 'folder',
+        owner: 'Me',
+        modified: 'Sep 8, 2026',
+        size: '—'
+    },
+
+    {
+        name: 'Work',
+        type: 'folder',
+        owner: 'Me',
+        modified: 'Sep 5, 2026',
+        size: '—'
+    },
+
+    {
+        name: 'Resume.pdf',
+        type: 'pdf',
+        owner: 'Me',
+        modified: 'Sep 3, 2026',
+        size: '2.4 MB'
+    },
+
+    {
+        name: 'Salary Structure.xlsx',
+        type: 'xlsx',
+        owner: 'Me',
+        modified: 'Sep 2, 2026',
+        size: '48 KB'
+    },
+
+    {
+        name: 'Notes.docx',
+        type: 'docx',
+        owner: 'Me',
+        modified: 'Aug 30, 2026',
+        size: '124 KB'
+    }
+
+];
+
+
+/* UPLOAD */
+
+function uploadFile() {
+
+    document
+        .getElementById('fileInput')
+        .click();
+
+}
+
+
+/* HANDLE UPLOAD */
+
+function handleFiles(list) {
+
+    for (const f of list) {
+
+        files.unshift({
+
+            name: f.name,
+
+            type:
+                f.name.split('.').pop()
+                || 'file',
+
+            owner: 'Me',
+
+            modified: 'Just now',
+
+            size:
+                (f.size / 1024 / 1024)
+                .toFixed(2)
+                + ' MB'
+
+        });
+
+    }
+
+    render();
+
+}
+
+
+/* FILE ICON */
+
+function icon(type) {
+
+    if (type === 'folder') {
+        return '📁';
+    }
+
+    if (type === 'pdf') {
+        return '📕';
+    }
+
+    if (type === 'xlsx') {
+        return '📊';
+    }
+
+    if (type === 'docx') {
+        return '📘';
+    }
+
+    return '📄';
+
+}
+
+
+/* RENDER */
+
+function render() {
+
+    const q =
+        document
+        .getElementById('search')
+        .value
+        .toLowerCase();
+
+
+    const filtered =
+        files.filter(
+            f =>
+                f.name
+                .toLowerCase()
+                .includes(q)
+        );
+
+
+    const folders =
+        document
+        .getElementById('folders');
+
+
+    const tbody =
+        document
+        .querySelector(
+            '#filesTable tbody'
+        );
+
+
+    const empty =
+        document
+        .getElementById('empty');
+
+
+    /* FOLDERS */
+
+    folders.innerHTML =
+
+        filtered
+        .filter(
+            f => f.type === 'folder'
+        )
+        .map(
+
+            f => `
+
+                <div
+                    class="card"
+                    onclick="alert('Opening ${f.name}')"
+                >
+
+                    <div class="folderIcon">
+                        📁
+                    </div>
+
+                    <div class="cardTitle">
+                        ${f.name}
+                    </div>
+
+                    <div class="meta">
+                        Folder
